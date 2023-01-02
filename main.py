@@ -137,7 +137,7 @@ print("Processing comparing time: ", processing_Time, " seconds")
 match_results = fa.align_matches(matches, query_matches,2)
 
 #display results
-print("Results:", match_results)
+#print("Results:", match_results)
 print("Results:")
 for result in match_results:
     print("Song: ", result.get("song_name"), " by ", result.get("song_author"), " with ", result.get("hashes_matched"), " matches")
