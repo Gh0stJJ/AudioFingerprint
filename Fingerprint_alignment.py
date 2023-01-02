@@ -1,5 +1,5 @@
 
-from MySQLDB import *
+from mysqlDB import *
 import os 
 import sys 
 from time import time

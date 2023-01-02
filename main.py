@@ -1,6 +1,6 @@
 from Audio_Fingerprinting import *
 import Fingerprint_alignment as fa
-from MySQLDB import *
+from mysqlDB import *
 from scipy.io import wavfile
 #LOGGING CONFIG
 logging.basicConfig(filename='log_basedatos.log', encoding='utf-8', level=logging.DEBUG)
