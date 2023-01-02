@@ -5,16 +5,25 @@ import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 import soundfile as sf
 import hashlib
+import logging
 from typing import List, Tuple
-import mysql.connector
-from mysql.connector.errors import DatabaseError
-
 from scipy import signal
 from scipy.io import wavfile
 from scipy.ndimage.filters import maximum_filter
 from scipy.ndimage.morphology import (binary_erosion,
-                                      generate_binary_structure,
-                                      iterate_structure)
+                                    generate_binary_structure,
+                                    iterate_structure)
+
+logging.basicConfig(filename='log_basedatos.log', encoding='utf-8', level=logging.DEBUG)
+
+#import database
+from basedatos import insert_song, insert_hashes
+
+#user input
+nombre = input("Ingresa el nombre de la cancion: ")
+interprete = input("Ingresa el nombre del autor: ")
+archivo = 'Lavender_Town_Japan.wav'
+
 #constants
 wsize = 4096
 wratio = 0.5
@@ -26,11 +35,9 @@ DEFAULT_FAN_VALUE = 5  # 15 was the original value.
 
 #read the audio file
 #data, samplerate = sf.read('Lavender_Town_Japan.wav')
-samplerate,data = wavfile.read('Lavender_Town_Japan.wav')
+samplerate,data = wavfile.read(archivo)
 #convert to mono the signal
 data = np.mean(data, axis=1)
-#normalize the signal
-data = data / np.max(np.abs(data))
 
 #samplig input signal to 44100Hz
 samplerate = 44100
@@ -95,9 +102,9 @@ def get_peaks(inputsignal,amp_min):
 
 
 #hashing the peaks
-def hash_peaks(peaks: List[Tuple[int, int]],fan_value) -> List[str]:
+def hash_peaks(peaks: List[Tuple[int, int]],fan_value) -> List[tuple[str, int]]:
     
-     # frequencies are in the first position of the tuples
+    # frequencies are in the first position of the tuples
     idx_freq = 0
     # times are in the second position of the tuples
     idx_time = 1
@@ -145,7 +152,11 @@ def fingerprint(audio_file, segment_size=10, fan_value=DEFAULT_FAN_VALUE, amp_mi
     #hash the peaks
     return hash_peaks(peaks, fan_value)
 
-print(fingerprint(data))
+#MAIN
 
+hashes = fingerprint(data)
+id = insert_song(nombre, interprete)
+print(id)
 
-
+if id is not None:
+    insert_hashes(id, hashes)
