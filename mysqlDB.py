@@ -182,7 +182,7 @@ def return_matches(hashes: list[tuple[str, int]]) ->  tuple[list[tuple[int, int]
             - offset_difference: (database_offset - sampled_offset)"""
 
             # Create a dictionary of hashes and their offsets
-    mapper = dict(hashes)
+    mapper = {}
     # Get the hashes from the mapper
     for hsh, offset in hashes:
         if hsh.upper() in mapper.keys():
@@ -195,24 +195,27 @@ def return_matches(hashes: list[tuple[str, int]]) ->  tuple[list[tuple[int, int]
     #Count the number of hashes in the query without duplicates
     query_hash_count = dict()
     results = []
-
+    #with db.cursor() as cursor
     for index in range(len(values),1000):
         # create query
         sql = 'SELECT song_id, hash, offset FROM fingerprints WHERE hash IN ({})'.format(','.join(['%s'] * len(values[index-1000:index])))
+        
         # execute query
-        resultset=db.cursor.execute(sql, values[index-1000:index])
 
-        for hsh,song_id,offset in resultset:
+        db.cursor.execute(sql, values[index-1000:index])
+        resultset = db.cursor.fetchall()
+
+        for song_id,hsh,offset in resultset:
             if song_id in query_hash_count:
                 query_hash_count[song_id] += 1
             else:
                 query_hash_count[song_id] = 1
 
             # Calculate the offset difference
-            offset_difference = offset - mapper[hsh][0]
+            offset_difference = offset - mapper.get(hsh.upper())[0]
             results.append((song_id, offset_difference))
         
-        return results, query_hash_count
+    return results, query_hash_count
 
 
 def get_song_by_id(song_id: int) -> tuple[str, str] | None:
@@ -226,4 +229,3 @@ def get_song_by_id(song_id: int) -> tuple[str, str] | None:
         return None
     else:
         return res[0]
-        

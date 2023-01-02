@@ -6,7 +6,7 @@ from time import time
 from itertools import groupby
 import Audio_Fingerprinting as af
 
-def genFingerprints(sdata: list[tuple[str, int]]) -> tuple[list[tuple[int, int]] , dict[int, int], float]:
+def genFingerprints(sdata: list[tuple[str, int]],sample_rate) -> tuple[list[tuple[str, int]] , dict[int, int], float]:
     
     t=time()
     hashes = af.fingerprint(sdata)
@@ -30,7 +30,7 @@ def align_matches(matches: list[tuple[int, int]], query_matches: dict[int, int],
 
     #Find songs resultset
     songs_resultset = []
-    for song_id, offset, count in songs_matches:
+    for song_id, offset, count in songs_matches[0:queried_hases]:
         song= get_song_by_id(song_id)
 
         #song name

@@ -111,6 +111,10 @@ def fingerprint(audio_file, segment_size=10, fan_value=DEFAULT_FAN_VALUE, amp_mi
     seconds = data.shape[0] / samplerate
     segments = seconds / segmentSize
     samplesPerSegment = int(data.shape[0] / segments)
+    plt.plot(data)
+    plt.xlabel('Sample')
+    plt.ylabel('Amplitude')
+    plt.show()
 
     #continuos time processing
     #using the fast fourier transform to convert the audio file to frequency domain
