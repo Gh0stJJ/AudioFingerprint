@@ -5,16 +5,17 @@ import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 import soundfile as sf
 import hashlib
+import logging
 from typing import List, Tuple
-import mysql.connector
-from mysql.connector.errors import DatabaseError
-
 from scipy import signal
 from scipy.io import wavfile
-from scipy.ndimage.filters import maximum_filter
-from scipy.ndimage.morphology import (binary_erosion,
-                                      generate_binary_structure,
-                                      iterate_structure)
+from scipy.ndimage import maximum_filter
+from scipy.ndimage import (binary_erosion,generate_binary_structure,iterate_structure)
+
+
+
+
+
 #constants
 wsize = 4096
 wratio = 0.5
@@ -22,38 +23,15 @@ CONNECTIVITY_MASK = 8
 DEFAULT_AMP_MIN = 10
 DEFAULT_FAN_VALUE = 5  # 15 was the original value.
 
+
 #get the imput audio file
+
 
 #read the audio file
 #data, samplerate = sf.read('Lavender_Town_Japan.wav')
-samplerate,data = wavfile.read('Lavender_Town_Japan.wav')
+
 #convert to mono the signal
-data = np.mean(data, axis=1)
-#normalize the signal
-data = data / np.max(np.abs(data))
 
-#samplig input signal to 44100Hz
-samplerate = 44100
-#data= signal.resample(data, int(len(data)*samplerate/len(data)))
-segmentSize=2
-seconds = data.shape[0] / samplerate
-segments = seconds / segmentSize
-samplesPerSegment = int(data.shape[0] / segments)
-
-#continuos time processing
-#using the fast fourier transform to convert the audio file to frequency domain
-#fft = np.fft.fft(data)
-#plot the audio file in frequency domain
-#plt.plot(fft)
-#plt.show()
-#plt.plot(data)
-#plt.xlabel('Sample')
-#plt.ylabel('Amplitude')
-#plt.subplot(212)
-#plt.specgram(data[0:samplesPerSegment],Fs=samplerate, mode='psd')
-#plt.xlabel('Time')
-#plt.ylabel('Frequency')
-#plt.show()
 #discrete time processing
 #using the fast fourier transform to convert the audio file to frequency domain
 
@@ -84,7 +62,7 @@ def get_peaks(inputsignal,amp_min):
     ax.scatter(times_filter, freqs_filter, c='r')
     ax.set_xlabel('Time')
     ax.set_ylabel('Frequency')
-    ax.set_title('Spectrogram')
+    ax.set_title('Spectrogram of input signal recorded')
     plt.gca().invert_yaxis()
     plt.show()
 
@@ -95,9 +73,9 @@ def get_peaks(inputsignal,amp_min):
 
 
 #hashing the peaks
-def hash_peaks(peaks: List[Tuple[int, int]],fan_value) -> List[str]:
+def hash_peaks(peaks: List[Tuple[int, int]],fan_value) -> List[tuple[str, int]]:
     
-     # frequencies are in the first position of the tuples
+    # frequencies are in the first position of the tuples
     idx_freq = 0
     # times are in the second position of the tuples
     idx_time = 1
@@ -123,6 +101,36 @@ def hash_peaks(peaks: List[Tuple[int, int]],fan_value) -> List[str]:
 
 #fingerprint function
 def fingerprint(audio_file, segment_size=10, fan_value=DEFAULT_FAN_VALUE, amp_min=DEFAULT_AMP_MIN):
+    data=audio_file
+    data = np.mean(data, axis=1)
+
+    #samplig input signal to 44100Hz
+    samplerate = 44100
+    #data= signal.resample(data, int(len(data)*samplerate/len(data)))
+    segmentSize=2
+    seconds = data.shape[0] / samplerate
+    segments = seconds / segmentSize
+    samplesPerSegment = int(data.shape[0] / segments)
+    plt.plot(data)
+    plt.xlabel('Sample')
+    plt.ylabel('Amplitude')
+    plt.title('Input recorded file')
+    plt.show()
+
+    #continuos time processing
+    #using the fast fourier transform to convert the audio file to frequency domain
+    #fft = np.fft.fft(data)
+    #plot the audio file in frequency domain
+    #plt.plot(fft)
+    #plt.show()
+    #plt.plot(data)
+    #plt.xlabel('Sample')
+    #plt.ylabel('Amplitude')
+    #plt.subplot(212)
+    #plt.specgram(data[0:samplesPerSegment],Fs=samplerate, mode='psd')
+    #plt.xlabel('Time')
+    #plt.ylabel('Frequency')
+    #plt.show()
     fft = np.fft.fft(data)
     #peack finding from spectrogram
     #peaks, _ = signal.find_peaks(fft, height=0)
@@ -137,6 +145,9 @@ def fingerprint(audio_file, segment_size=10, fan_value=DEFAULT_FAN_VALUE, amp_mi
 
     #graphical representation of the spectrogram
     plt.imshow(arr2D, cmap='hot', interpolation='nearest')
+    plt.xlabel('Time')
+    plt.ylabel('Frequency')
+    plt.title('Spectrogram of the input recorded file')
     plt.show()
 
     #find local maxima
@@ -144,8 +155,4 @@ def fingerprint(audio_file, segment_size=10, fan_value=DEFAULT_FAN_VALUE, amp_mi
 
     #hash the peaks
     return hash_peaks(peaks, fan_value)
-
-print(fingerprint(data))
-
-
 

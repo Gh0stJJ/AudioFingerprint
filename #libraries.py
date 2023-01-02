@@ -17,13 +17,13 @@ from scipy.ndimage.morphology import (binary_erosion,
 #constants
 wsize = 4096
 wratio = 0.5
-CONNECTIVITY_MASK = 8
-DEFAULT_AMP_MIN = 10
+CONNECTIVITY_MASK = 2
+DEFAULT_AMP_MIN = 20
 DEFAULT_FAN_VALUE = 5  # 15 was the original value.
 
 #read the audio file
 #data, samplerate = sf.read('Lavender_Town_Japan.wav')
-samplerate,data = wavfile.read('Lavender_Town_Japan.wav')
+samplerate,data = wavfile.read('Blurred_Lines.wav')
 #convert to mono the signal
 data = np.mean(data, axis=1)
 print(samplerate)
@@ -92,15 +92,43 @@ def get_peaks(inputsignal,amp_min):
 
     #scatter plot of the peaks
     fig, ax = plt.subplots()
-    ax.imshow(inputsignal)
-    ax.scatter(times_filter, freqs_filter, c='r')
+    ax.imshow(inputsignal, cmap='hot', interpolation='nearest')
+    ax.scatter(times_filter, freqs_filter, c='b')
+    ax.set_xlim(50, 850)
+    ax.set_ylim(50, 450)
     ax.set_xlabel('Time')
     ax.set_ylabel('Frequency')
     ax.set_title('Spectrogram')
     plt.gca().invert_yaxis()
+    
     plt.show()
 
     return list(zip(freqs_filter, times_filter))
 
 
 get_peaks(arr2D, DEFAULT_AMP_MIN)
+
+#function to manually create an spectrogram, using the fast fourier transform to convert the audio file to frequency domain
+def create_spectrogram(data, samplerate):
+    # Number of samplepoints
+    N = len(data)
+    # sample spacing
+    T = 1.0 / samplerate
+    x = np.linspace(0.0, N*T, N)
+    y = data
+    yf = fft(y)
+    xf = np.linspace(0.0, 1.0/(2.0*T), N//2)
+    plt.plot(xf, 2.0/N * np.abs(yf[0:N//2]))
+    plt.grid()
+    plt.show()
+
+
+
+#function to manually calculate the fourier transform of an input signal
+def fft(x):
+    N = len(x)
+    if N <= 1: return x
+    even = fft(x[0::2])
+    odd =  fft(x[1::2])
+    T= [np.exp(-2j*np.pi*k/N)*odd[k] for k in range(N//2)]
+    return [even[k] + T[k] for k in range(N//2)] + [even[k] - T[k] for k in range(N//2)]
