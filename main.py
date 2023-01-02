@@ -125,7 +125,7 @@ def songs_toDB():
 #songs_toDB()
 
 #input recording to compare
-file = "split.wav"
+file = "Grabación.wav"
 samplerate,data = wavfile.read(file)
 #fingerprinting input recording unpacking
 hashes , process_time = fa.genFingerprints(data, samplerate)
@@ -143,3 +143,4 @@ for result in match_results:
     print("Song: ", result.get("song_name"), " by ", result.get("song_author"), " with ", result.get("hashes_matched"), " matches")
 
 
+#algorithm to align matches
