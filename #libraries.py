@@ -104,3 +104,4 @@ def get_peaks(inputsignal,amp_min):
 
 
 get_peaks(arr2D, DEFAULT_AMP_MIN)
+
