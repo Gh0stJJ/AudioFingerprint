@@ -12,15 +12,9 @@ from scipy.io import wavfile
 from scipy.ndimage import maximum_filter
 from scipy.ndimage import (binary_erosion,generate_binary_structure,iterate_structure)
 
-logging.basicConfig(filename='log_basedatos.log', encoding='utf-8', level=logging.DEBUG)
 
-#import database
-from MySQLDB import insert_song, insert_hashes 
 
-#user input
-nombre = input("Ingresa el nombre de la cancion: ")
-interprete = input("Ingresa el nombre del autor: ")
-archivo = 'Lavender_Town_Japan.wav'
+
 
 #constants
 wsize = 4096
@@ -35,32 +29,9 @@ DEFAULT_FAN_VALUE = 5  # 15 was the original value.
 
 #read the audio file
 #data, samplerate = sf.read('Lavender_Town_Japan.wav')
-samplerate,data = wavfile.read(archivo)
+
 #convert to mono the signal
-data = np.mean(data, axis=1)
 
-#samplig input signal to 44100Hz
-samplerate = 44100
-#data= signal.resample(data, int(len(data)*samplerate/len(data)))
-segmentSize=2
-seconds = data.shape[0] / samplerate
-segments = seconds / segmentSize
-samplesPerSegment = int(data.shape[0] / segments)
-
-#continuos time processing
-#using the fast fourier transform to convert the audio file to frequency domain
-#fft = np.fft.fft(data)
-#plot the audio file in frequency domain
-#plt.plot(fft)
-#plt.show()
-#plt.plot(data)
-#plt.xlabel('Sample')
-#plt.ylabel('Amplitude')
-#plt.subplot(212)
-#plt.specgram(data[0:samplesPerSegment],Fs=samplerate, mode='psd')
-#plt.xlabel('Time')
-#plt.ylabel('Frequency')
-#plt.show()
 #discrete time processing
 #using the fast fourier transform to convert the audio file to frequency domain
 
@@ -130,6 +101,31 @@ def hash_peaks(peaks: List[Tuple[int, int]],fan_value) -> List[tuple[str, int]]:
 
 #fingerprint function
 def fingerprint(audio_file, segment_size=10, fan_value=DEFAULT_FAN_VALUE, amp_min=DEFAULT_AMP_MIN):
+    data=audio_file
+    data = np.mean(data, axis=1)
+
+    #samplig input signal to 44100Hz
+    samplerate = 44100
+    #data= signal.resample(data, int(len(data)*samplerate/len(data)))
+    segmentSize=2
+    seconds = data.shape[0] / samplerate
+    segments = seconds / segmentSize
+    samplesPerSegment = int(data.shape[0] / segments)
+
+    #continuos time processing
+    #using the fast fourier transform to convert the audio file to frequency domain
+    #fft = np.fft.fft(data)
+    #plot the audio file in frequency domain
+    #plt.plot(fft)
+    #plt.show()
+    #plt.plot(data)
+    #plt.xlabel('Sample')
+    #plt.ylabel('Amplitude')
+    #plt.subplot(212)
+    #plt.specgram(data[0:samplesPerSegment],Fs=samplerate, mode='psd')
+    #plt.xlabel('Time')
+    #plt.ylabel('Frequency')
+    #plt.show()
     fft = np.fft.fft(data)
     #peack finding from spectrogram
     #peaks, _ = signal.find_peaks(fft, height=0)
@@ -152,11 +148,3 @@ def fingerprint(audio_file, segment_size=10, fan_value=DEFAULT_FAN_VALUE, amp_mi
     #hash the peaks
     return hash_peaks(peaks, fan_value)
 
-#MAIN
-
-hashes = fingerprint(data)
-id = insert_song(nombre, interprete)
-print(id)
-
-if id is not None:
-    insert_hashes(id, hashes)

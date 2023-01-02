@@ -172,3 +172,58 @@ def insert_hashes(id_song: int, hashes: list[tuple[str, int]]) -> int:
     db.connection.commit()
     
     return 0
+
+def return_matches(hashes: list[tuple[str, int]]) ->  tuple[list[tuple[int, int]], dict[int, int]]:
+    db = DataBase()
+    """Searches the database for a song match given a list of hashes in pairs of (hash, offset)
+    returns a of (sid, offset_difference) tuples and a dictionary with the amount of hashes matched (not considering
+        duplicated hashes) in each song.
+            - song id: Song identifier
+            - offset_difference: (database_offset - sampled_offset)"""
+
+            # Create a dictionary of hashes and their offsets
+    mapper = dict(hashes)
+    # Get the hashes from the mapper
+    for hsh, offset in hashes:
+        if hsh.upper() in mapper.keys():
+            mapper[hsh.upper()].append(offset)
+        else:
+            mapper[hsh.upper()] = [offset]
+    
+    values = list(mapper.keys())
+
+    #Count the number of hashes in the query without duplicates
+    query_hash_count = dict()
+    results = []
+
+    for index in range(len(values),1000):
+        # create query
+        sql = 'SELECT song_id, hash, offset FROM fingerprints WHERE hash IN ({})'.format(','.join(['%s'] * len(values[index-1000:index])))
+        # execute query
+        resultset=db.cursor.execute(sql, values[index-1000:index])
+
+        for hsh,song_id,offset in resultset:
+            if song_id in query_hash_count:
+                query_hash_count[song_id] += 1
+            else:
+                query_hash_count[song_id] = 1
+
+            # Calculate the offset difference
+            offset_difference = offset - mapper[hsh][0]
+            results.append((song_id, offset_difference))
+        
+        return results, query_hash_count
+
+
+def get_song_by_id(song_id: int) -> tuple[str, str] | None:
+    db = DataBase()
+    res = db.select('songs', 'song_name', 'interprete', song_id=song_id)
+    if res == 1:
+        print('Error de Operacion')
+        return None
+    elif res == 2:
+        print('Error de Integridad')
+        return None
+    else:
+        return res[0]
+        
