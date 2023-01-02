@@ -62,7 +62,7 @@ def get_peaks(inputsignal,amp_min):
     ax.scatter(times_filter, freqs_filter, c='r')
     ax.set_xlabel('Time')
     ax.set_ylabel('Frequency')
-    ax.set_title('Spectrogram')
+    ax.set_title('Spectrogram of input signal recorded')
     plt.gca().invert_yaxis()
     plt.show()
 
@@ -114,6 +114,7 @@ def fingerprint(audio_file, segment_size=10, fan_value=DEFAULT_FAN_VALUE, amp_mi
     plt.plot(data)
     plt.xlabel('Sample')
     plt.ylabel('Amplitude')
+    plt.title('Input recorded file')
     plt.show()
 
     #continuos time processing
@@ -144,6 +145,9 @@ def fingerprint(audio_file, segment_size=10, fan_value=DEFAULT_FAN_VALUE, amp_mi
 
     #graphical representation of the spectrogram
     plt.imshow(arr2D, cmap='hot', interpolation='nearest')
+    plt.xlabel('Time')
+    plt.ylabel('Frequency')
+    plt.title('Spectrogram of the input recorded file')
     plt.show()
 
     #find local maxima
