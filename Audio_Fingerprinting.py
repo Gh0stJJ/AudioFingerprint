@@ -9,15 +9,13 @@ import logging
 from typing import List, Tuple
 from scipy import signal
 from scipy.io import wavfile
-from scipy.ndimage.filters import maximum_filter
-from scipy.ndimage.morphology import (binary_erosion,
-                                    generate_binary_structure,
-                                    iterate_structure)
+from scipy.ndimage import maximum_filter
+from scipy.ndimage import (binary_erosion,generate_binary_structure,iterate_structure)
 
 logging.basicConfig(filename='log_basedatos.log', encoding='utf-8', level=logging.DEBUG)
 
 #import database
-from basedatos import insert_song, insert_hashes
+from MySQLDB import insert_song, insert_hashes 
 
 #user input
 nombre = input("Ingresa el nombre de la cancion: ")
@@ -31,7 +29,9 @@ CONNECTIVITY_MASK = 8
 DEFAULT_AMP_MIN = 10
 DEFAULT_FAN_VALUE = 5  # 15 was the original value.
 
+
 #get the imput audio file
+
 
 #read the audio file
 #data, samplerate = sf.read('Lavender_Town_Japan.wav')
